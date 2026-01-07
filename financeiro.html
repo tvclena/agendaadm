@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Financeiro • CLENA</title>
+
+<meta name="viewport"
+  content="width=device-width,
+  initial-scale=1,
+  maximum-scale=1,
+  user-scalable=no,
+  viewport-fit=cover">
+
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+
+<style>
+:root{
+  --bg:#040507;
+  --panel:#020409;
+  --card:#0b1220;
+  --border:#0f172a;
+  --neon:#00e5ff;
+  --ok:#22c55e;
+  --warn:#facc15;
+  --danger:#ef4444;
+  --text:#fff;
+  --muted:#9ca3af;
+}
+
+*{
+  box-sizing:border-box;
+  font-family:Inter;
+  touch-action:manipulation;
+}
+
+html,body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+}
+
+/* LAYOUT */
+.container{
+  padding:12px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.card{
+  background:linear-gradient(180deg,#0b1220,#060a14);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:14px;
+}
+
+/* KPI */
+.kpis{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+.kpi{
+  background:#000;
+  border-radius:14px;
+  padding:12px;
+}
+.kpi strong{
+  display:block;
+  font-size:18px;
+}
+.kpi span{
+  font-size:11px;
+  color:var(--muted);
+}
+
+/* CALENDÁRIO */
+.calendar{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:6px;
+}
+.day{
+  background:#000;
+  border-radius:10px;
+  padding:8px;
+  text-align:center;
+  font-size:10px;
+}
+.day strong{
+  display:block;
+  font-size:12px;
+  color:var(--neon);
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <!-- KPIs -->
+  <div class="card kpis">
+    <div class="kpi">
+      <strong id="kRecebido">R$ 0,00</strong>
+      <span>Recebido no mês</span>
+    </div>
+    <div class="kpi">
+      <strong id="kPrevisto">R$ 0,00</strong>
+      <span>Previsto</span>
+    </div>
+    <div class="kpi">
+      <strong id="kLojas">0</strong>
+      <span>Lojas ativas</span>
+    </div>
+  </div>
+
+  <!-- GRÁFICO PRINCIPAL -->
+  <div class="card">
+    <canvas id="grafico"></canvas>
+  </div>
+
+  <!-- PREVISÃO POR DIA -->
+  <div class="card">
+    <h3 style="font-size:13px;color:var(--muted);margin-bottom:8px">
+      Previsão de recebimento por dia
+    </h3>
+    <div class="calendar" id="calendar"></div>
+  </div>
+
+  <!-- PRODUTOS / SERVIÇOS -->
+  <div class="card">
+    <canvas id="graficoProdutos"></canvas>
+  </div>
+
+</div>
+
+<script>
+const sb = supabase.createClient(
+  "https://egxjgmzukjyyxmkukwub.supabase.co",
+  "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
+);
+
+const MENSALIDADE = 14.90;
+
+let chartMain, chartProd;
+
+function moeda(v){
+  return "R$ " + v.toFixed(2).replace(".",",");
+}
+
+async function carregar(){
+  const hoje = new Date();
+  const mes = hoje.getMonth();
+  const ano = hoje.getFullYear();
+
+  /* PAGAMENTOS */
+  const { data: pagamentos } = await sb
+    .from("pagamentos_assinatura")
+    .select("*");
+
+  /* LOJAS */
+  const { data: lojas } = await sb
+    .from("user_profile")
+    .select("user_id,assinatura_valida_ate,status");
+
+  /* PRODUTOS */
+  const { data: produtos } = await sb
+    .from("produtos_servicos")
+    .select("user_id,tipo,ativo")
+    .eq("ativo",true);
+
+  /* KPI */
+  let recebido = 0;
+  pagamentos.forEach(p=>{
+    if(p.status==="approved"){
+      const d = new Date(p.criado_em);
+      if(d.getMonth()===mes && d.getFullYear()===ano){
+        recebido += Number(p.valor);
+      }
+    }
+  });
+
+  let previsto = 0;
+  const previsaoPorDia = {};
+
+  lojas.forEach(l=>{
+    if(l.status!=="active") return;
+    if(!l.assinatura_valida_ate) return;
+
+    const prox = new Date(l.assinatura_valida_ate);
+    prox.setDate(prox.getDate()+1);
+
+    if(prox.getMonth()===mes && prox.getFullYear()===ano){
+      previsto += MENSALIDADE;
+      const key = prox.getDate();
+      previsaoPorDia[key] = (previsaoPorDia[key]||0)+MENSALIDADE;
+    }
+  });
+
+  kRecebido.innerText = moeda(recebido);
+  kPrevisto.innerText = moeda(previsto);
+  kLojas.innerText = lojas.filter(l=>l.status==="active").length;
+
+  /* GRÁFICO EVOLUÇÃO */
+  const diasMes = new Date(ano, mes+1, 0).getDate();
+  let acumulado = 0;
+  const labels=[], valores=[];
+
+  for(let d=1; d<=diasMes; d++){
+    pagamentos.forEach(p=>{
+      if(p.status==="approved"){
+        const dt = new Date(p.criado_em);
+        if(dt.getDate()===d && dt.getMonth()===mes){
+          acumulado += Number(p.valor);
+        }
+      }
+    });
+    acumulado += previsaoPorDia[d]||0;
+    labels.push(d.toString().padStart(2,"0"));
+    valores.push(acumulado.toFixed(2));
+  }
+
+  if(chartMain) chartMain.destroy();
+  chartMain = new Chart(grafico,{
+    type:"line",
+    data:{
+      labels,
+      datasets:[{
+        data:valores,
+        borderColor:"#00e5ff",
+        tension:.4,
+        borderWidth:3,
+        pointRadius:0
+      }]
+    },
+    options:{
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:"#9ca3af"}},
+        y:{ticks:{color:"#9ca3af"}}
+      }
+    }
+  });
+
+  /* CALENDÁRIO */
+  calendar.innerHTML = "";
+  for(let d=1; d<=diasMes; d++){
+    calendar.innerHTML += `
+      <div class="day">
+        ${d}
+        <strong>${previsaoPorDia[d]?moeda(previsaoPorDia[d]):""}</strong>
+      </div>
+    `;
+  }
+
+  /* PRODUTOS / SERVIÇOS */
+  const lojasProdutos = new Set();
+  const lojasServicos = new Set();
+
+  produtos.forEach(p=>{
+    if(p.tipo==="PRODUTO") lojasProdutos.add(p.user_id);
+    if(p.tipo==="SERVICO") lojasServicos.add(p.user_id);
+  });
+
+  if(chartProd) chartProd.destroy();
+  chartProd = new Chart(graficoProdutos,{
+    type:"doughnut",
+    data:{
+      labels:["Produtos","Serviços"],
+      datasets:[{
+        data:[lojasProdutos.size,lojasServicos.size],
+        backgroundColor:["#00e5ff","#22c55e"],
+        borderRadius:12
+      }]
+    },
+    options:{
+      plugins:{legend:{labels:{color:"#fff"}}}
+    }
+  });
+}
+
+window.addEventListener("message",e=>{
+  if(e.data?.type==="REFRESH") carregar();
+});
+
+carregar();
+</script>
+
+</body>
+</html>
