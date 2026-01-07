@@ -12,32 +12,36 @@
 <style>
 :root{
   --bg:#040507;
+  --panel:#020409;
   --card:#0b1220;
   --border:#0f172a;
   --neon:#00e5ff;
   --ok:#22c55e;
   --warn:#facc15;
   --danger:#ef4444;
-  --text:#fff;
-  --muted:#9ca3af;
+  --neutral:#9ca3af;
+  --text:#ffffff;
 }
 
 *{box-sizing:border-box;font-family:Inter}
 html,body{margin:0;background:var(--bg);color:var(--text)}
 
-/* 🔍 TOPO */
+/* 🔝 TOPO */
 .top{
-  padding:12px;
+  position:sticky;
+  top:0;
+  z-index:10;
+  background:var(--panel);
+  padding:10px;
   display:flex;
   gap:8px;
-  align-items:center;
 }
 .top input{
   flex:1;
   padding:10px 14px;
   border-radius:999px;
   border:1px solid var(--border);
-  background:#020409;
+  background:#000;
   color:#fff;
   outline:none;
 }
@@ -45,7 +49,7 @@ html,body{margin:0;background:var(--bg);color:var(--text)}
   padding:10px 14px;
   border-radius:999px;
   border:1px solid var(--border);
-  background:#020409;
+  background:#000;
   color:var(--neon);
   font-weight:800;
   cursor:pointer;
@@ -55,7 +59,7 @@ html,body{margin:0;background:var(--bg);color:var(--text)}
   box-shadow:0 0 14px rgba(0,229,255,.4);
 }
 
-/* GRID */
+/* 🧱 GRID */
 .container{
   padding:12px;
   display:grid;
@@ -63,7 +67,7 @@ html,body{margin:0;background:var(--bg);color:var(--text)}
   gap:12px;
 }
 
-/* CARD */
+/* 🏪 CARD */
 .card{
   background:linear-gradient(180deg,#0b1220,#060a14);
   border:1px solid var(--border);
@@ -74,63 +78,66 @@ html,body{margin:0;background:var(--bg);color:var(--text)}
   gap:10px;
   cursor:pointer;
 }
-
-/* HEADER */
 .header{display:flex;gap:10px;align-items:center}
 .logo{
   width:42px;height:42px;border-radius:50%;
-  background:#020409;border:1px solid var(--border);
+  background:#000;border:1px solid var(--border);
   background-size:cover;background-position:center;
   display:flex;align-items:center;justify-content:center;
   font-weight:900;color:var(--neon)
 }
-.title strong{font-size:13px;display:block}
-.title span{font-size:11px;color:var(--muted)}
+.title strong{font-size:13px}
+.title span{font-size:11px;color:var(--neutral)}
 
 .badges{display:flex;gap:6px;flex-wrap:wrap}
-.badge{font-size:10px;padding:4px 8px;border-radius:999px;font-weight:800}
+.badge{
+  font-size:10px;
+  padding:4px 8px;
+  border-radius:999px;
+  font-weight:900;
+}
 .ok{background:rgba(34,197,94,.15);color:#4ade80}
 .warn{background:rgba(250,204,21,.15);color:#fde047}
 .danger{background:rgba(239,68,68,.15);color:#f87171}
 .neutral{background:rgba(148,163,184,.15);color:#e5e7eb}
 
-/* MODAL */
+/* 🪟 MODAL */
 #modal{
-  position:fixed;inset:0;background:rgba(0,0,0,.8);
+  position:fixed;inset:0;background:rgba(0,0,0,.85);
   display:none;align-items:center;justify-content:center;z-index:9999
 }
 .modal{
-  width:95%;max-height:90%;
-  background:#020409;border-radius:18px;
+  width:95%;max-height:92%;
+  background:var(--panel);
+  border-radius:18px;
   overflow:auto;padding:16px
 }
 .close{
   float:right;border:none;background:none;color:#fff;font-size:20px;cursor:pointer
 }
-.section{margin-top:12px}
-.section h3{font-size:12px;color:var(--muted);margin-bottom:6px}
+.section{margin-top:14px}
+.section h3{font-size:12px;color:var(--neutral);margin-bottom:6px}
 .row{font-size:12px;margin-bottom:4px}
 
-/* TABELA */
-table{width:100%;border-collapse:collapse;margin-top:8px}
-th,td{padding:6px;font-size:11px;border-bottom:1px solid var(--border);text-align:left}
+/* 💳 TABELA */
+table{width:100%;border-collapse:collapse}
+th,td{padding:6px;font-size:11px;border-bottom:1px solid var(--border)}
 </style>
 </head>
 
 <body>
 
-<!-- 🔍 BUSCA + FILTROS -->
+<!-- 🔝 BUSCA + FILTROS -->
 <div class="top">
   <input id="busca" placeholder="Buscar loja..." oninput="render()">
-  <button onclick="setFiltro('todas')" class="active" id="f-todas">Todas</button>
-  <button onclick="setFiltro('sem-pagamento')" id="f-sem">Sem pagamento</button>
-  <button onclick="setFiltro('expirada')" id="f-exp">Expiradas</button>
+  <button id="f-todas" class="active" onclick="setFiltro('todas')">Todas</button>
+  <button id="f-sem" onclick="setFiltro('sem')">Sem pagamento</button>
+  <button id="f-exp" onclick="setFiltro('exp')">Expiradas</button>
 </div>
 
-<!-- GRID -->
 <div class="container" id="lista"></div>
 
-<!-- MODAL -->
+<!-- 🪟 MODAL -->
 <div id="modal">
   <div class="modal">
     <button class="close" onclick="fechar()">✕</button>
@@ -146,74 +153,77 @@ const sb = supabase.createClient(
 
 let lojas=[], filtro="todas";
 
-function fmt(d){
-  if(!d) return "-";
-  const x=new Date(d);
-  return x.toLocaleDateString("pt-BR")+" "+x.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
-}
+const fmt = d => d
+  ? new Date(d).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"})
+  : "-";
 
 async function carregar(){
   const { data } = await sb.from("user_profile")
-    .select("*")
-    .order("created_at",{ascending:false});
+    .select("*").order("created_at",{ascending:false});
   lojas=data||[];
   render();
 }
 
-function render(){
-  const q=busca.value.toLowerCase();
-  lista.innerHTML = lojas.filter(l=>{
-    if(q && !l.negocio?.toLowerCase().includes(q)) return false;
-    if(filtro==="sem-pagamento" && l.pagamento_online_ativo) return false;
-    if(filtro==="expirada" && l.status!=="expired") return false;
-    return true;
-  }).map(l=>{
-    return `
-      <div class="card" onclick="abrir('${l.user_id}')">
-        <div class="header">
-          <div class="logo" style="background-image:url('${l.avatar_url||""}')">${l.avatar_url?"":l.negocio?.[0]}</div>
-          <div class="title">
-            <strong>${l.negocio}</strong>
-            <span>${l.tipo||""}</span>
-          </div>
-        </div>
-        <div class="badges">
-          ${l.pagamento_online_ativo?'<span class="badge ok">Pagamento online</span>':'<span class="badge danger">Sem pagamento</span>'}
-          ${l.status==="active"?'<span class="badge ok">Ativa</span>':l.status==="trial"?'<span class="badge warn">Teste</span>':'<span class="badge danger">Expirada</span>'}
-        </div>
-      </div>
-    `;
-  }).join("");
-}
-
 function setFiltro(f){
   filtro=f;
-  ["todas","sem-pagamento","expirada"].forEach(x=>{
-    document.getElementById("f-"+(x==="todas"?"todas":x==="sem-pagamento"?"sem":"exp")).classList.remove("active");
+  ["todas","sem","exp"].forEach(x=>{
+    document.getElementById("f-"+x)?.classList.remove("active");
   });
-  document.getElementById("f-"+(f==="todas"?"todas":f==="sem-pagamento"?"sem":"exp")).classList.add("active");
+  document.getElementById("f-"+f).classList.add("active");
   render();
+}
+
+function render(){
+  const q = busca.value.toLowerCase();
+  lista.innerHTML = lojas.filter(l=>{
+    if(q && !l.negocio?.toLowerCase().includes(q)) return false;
+    if(filtro==="sem" && l.pagamento_online_ativo) return false;
+    if(filtro==="exp" && l.status!=="expired") return false;
+    return true;
+  }).map(l=>`
+    <div class="card" onclick="abrir('${l.user_id}')">
+      <div class="header">
+        <div class="logo" style="background-image:url('${l.avatar_url||""}')">${l.avatar_url?"":l.negocio?.[0]}</div>
+        <div class="title">
+          <strong>${l.negocio}</strong>
+          <span>${l.tipo||""}</span>
+        </div>
+      </div>
+      <div class="badges">
+        ${l.pagamento_online_ativo?'<span class="badge ok">Pagamento online</span>':'<span class="badge danger">Sem pagamento</span>'}
+        ${l.status==="active"?'<span class="badge ok">Ativa</span>':l.status==="trial"?'<span class="badge warn">Teste</span>':'<span class="badge danger">Expirada</span>'}
+      </div>
+    </div>
+  `).join("");
 }
 
 async function abrir(user_id){
   const loja = lojas.find(l=>l.user_id===user_id);
-  const { data:pg } = await sb.from("pagamentos_assinatura")
+  const { data: pg } = await sb.from("pagamentos_assinatura")
     .select("*").eq("user_id",user_id)
     .order("criado_em",{ascending:false});
 
   detalhes.innerHTML = `
     <h2>${loja.negocio}</h2>
-    <div class="row">Responsável: ${loja.responsavel}</div>
+    <div class="row">Responsável: ${loja.responsavel||"-"}</div>
     <div class="row">WhatsApp: ${loja.whatsapp||"-"}</div>
+    <div class="row">Slug: ${loja.slug||"-"}</div>
 
     <div class="section">
-      <h3>Histórico de Pagamentos</h3>
+      <button onclick="window.open('https://www.clena.com.br/loja.html?${loja.slug}','_blank')"
+        style="padding:10px 14px;border-radius:999px;border:1px solid var(--neon);background:#000;color:var(--neon);font-weight:900">
+        Visualizar loja
+      </button>
+    </div>
+
+    <div class="section">
+      <h3>Histórico de pagamentos</h3>
       <table>
         <tr><th>Data</th><th>Valor</th><th>Status</th></tr>
         ${(pg||[]).map(p=>`
           <tr>
             <td>${fmt(p.criado_em)}</td>
-            <td>R$ ${p.valor}</td>
+            <td>R$ ${Number(p.valor).toFixed(2)}</td>
             <td>
               <span class="badge ${
                 p.status==="approved"?"ok":p.status==="pending"?"neutral":"danger"
@@ -226,6 +236,7 @@ async function abrir(user_id){
   `;
   modal.style.display="flex";
 }
+
 function fechar(){ modal.style.display="none"; }
 
 window.addEventListener("message",e=>{
