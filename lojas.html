@@ -324,15 +324,27 @@ async function salvar(){
   const status = document.getElementById("statusSel").value;
   const fim = document.getElementById("fimTeste").value || null;
 
-  await sb.from("user_profile")
-    .update({
-      status,
-      fim_teste: fim
-    })
-    .eq("user_id", lojaAtual.user_id);
+  try{
+    const res = await fetch("/api/admin-update-loja.js",{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({
+        user_id: lojaAtual.user_id,
+        status,
+        fim_teste: fim
+      })
+    });
 
-  fechar();
-  carregar();
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error);
+
+    alert("Alterações salvas com sucesso ✅");
+    fechar();
+    carregar();
+
+  }catch(err){
+    alert("Erro ao salvar: " + err.message);
+  }
 }
 
 function fechar(){
