@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Faturamento • CLENA</title>
+
+<meta name="viewport"
+  content="width=device-width,
+  initial-scale=1,
+  maximum-scale=1,
+  user-scalable=no,
+  viewport-fit=cover">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+
+<style>
+:root{
+  --bg:#040507;
+  --card:#0b1220;
+  --border:#0f172a;
+  --neon:#00e5ff;
+  --ok:#22c55e;
+  --warn:#facc15;
+  --danger:#ef4444;
+  --text:#fff;
+  --muted:#9ca3af;
+}
+*{box-sizing:border-box;font-family:Inter}
+html,body{margin:0;background:var(--bg);color:var(--text)}
+
+.container{
+  padding:12px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.card{
+  background:linear-gradient(180deg,#0b1220,#060a14);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:14px;
+}
+
+.kpis{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+}
+.kpi{
+  background:#000;
+  border-radius:14px;
+  padding:12px;
+}
+.kpi strong{font-size:18px}
+.kpi span{font-size:11px;color:var(--muted)}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <!-- KPIs -->
+  <div class="card kpis">
+    <div class="kpi">
+      <strong id="kReceitaAnual">R$ 0,00</strong>
+      <span>Receita anual projetada</span>
+    </div>
+    <div class="kpi">
+      <strong id="kChurn">0%</strong>
+      <span>Taxa de perda</span>
+    </div>
+  </div>
+
+  <!-- Evolução mensal -->
+  <div class="card">
+    <canvas id="graficoEvolucao"></canvas>
+  </div>
+
+  <!-- Crescimento -->
+  <div class="card">
+    <canvas id="graficoCrescimento"></canvas>
+  </div>
+
+  <!-- Estados -->
+  <div class="card">
+    <canvas id="graficoEstados"></canvas>
+  </div>
+
+</div>
+
+<script>
+const sb = supabase.createClient(
+  "https://egxjgmzukjyyxmkukwub.supabase.co",
+  "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
+);
+
+const MENSALIDADE = 14.90;
+
+let g1,g2,g3;
+
+function moeda(v){
+  return "R$ " + v.toFixed(2).replace(".",",");
+}
+
+async function carregar(){
+  const { data: pagamentos } = await sb
+    .from("pagamentos_assinatura")
+    .select("*");
+
+  const { data: lojas } = await sb
+    .from("user_profile")
+    .select("user_id,status,created_at,uf");
+
+  /* Receita mensal */
+  const receitaMes = {};
+  pagamentos.forEach(p=>{
+    if(p.status==="approved"){
+      const d = new Date(p.criado_em);
+      const k = `${d.getFullYear()}-${d.getMonth()+1}`;
+      receitaMes[k] = (receitaMes[k]||0) + Number(p.valor);
+    }
+  });
+
+  const labelsMes = Object.keys(receitaMes).sort();
+  const valoresMes = labelsMes.map(k=>receitaMes[k]);
+
+  /* Receita anual projetada */
+  const ativas = lojas.filter(l=>l.status==="active").length;
+  kReceitaAnual.innerText = moeda(ativas * MENSALIDADE * 12);
+
+  /* Churn */
+  const expiradas = lojas.filter(l=>l.status==="expired").length;
+  const churn = lojas.length ? (expiradas / lojas.length * 100) : 0;
+  kChurn.innerText = churn.toFixed(1) + "%";
+
+  /* Gráfico evolução */
+  if(g1) g1.destroy();
+  g1 = new Chart(graficoEvolucao,{
+    type:"line",
+    data:{
+      labels:labelsMes,
+      datasets:[{
+        data:valoresMes,
+        borderColor:"#00e5ff",
+        borderWidth:3,
+        tension:.4,
+        pointRadius:3
+      }]
+    },
+    options:{plugins:{legend:{display:false}}}
+  });
+
+  /* Crescimento */
+  const novosPorMes = {};
+  lojas.forEach(l=>{
+    const d = new Date(l.created_at);
+    const k = `${d.getFullYear()}-${d.getMonth()+1}`;
+    novosPorMes[k] = (novosPorMes[k]||0) + 1;
+  });
+
+  const labelsGrow = Object.keys(novosPorMes).sort();
+  const valoresGrow = labelsGrow.map(k=>novosPorMes[k]);
+
+  if(g2) g2.destroy();
+  g2 = new Chart(graficoCrescimento,{
+    type:"bar",
+    data:{
+      labels:labelsGrow,
+      datasets:[{
+        data:valoresGrow,
+        backgroundColor:"#22c55e",
+        borderRadius:8
+      }]
+    },
+    options:{plugins:{legend:{display:false}}}
+  });
+
+  /* Estados */
+  const estados = {};
+  lojas.forEach(l=>{
+    if(!l.uf || l.status!=="active") return;
+    estados[l.uf] = (estados[l.uf]||0) + 1;
+  });
+
+  if(g3) g3.destroy();
+  g3 = new Chart(graficoEstados,{
+    type:"doughnut",
+    data:{
+      labels:Object.keys(estados),
+      datasets:[{
+        data:Object.values(estados),
+        backgroundColor:["#00e5ff","#22c55e","#facc15","#ef4444"],
+        borderRadius:12
+      }]
+    },
+    options:{plugins:{legend:{labels:{color:"#fff"}}}}
+  });
+}
+
+window.addEventListener("message",e=>{
+  if(e.data?.type==="REFRESH") carregar();
+});
+
+carregar();
+</script>
+
+</body>
+</html>
