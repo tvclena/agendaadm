@@ -6,32 +6,30 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
+<!-- PWA -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CLENA">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
 
 <style>
-/* ================= THEME ================= */
 :root{
   --bg:#040507;
   --panel:#080b12;
   --border:#0f172a;
   --neon:#00e5ff;
-  --danger:#ff2d2d;
   --text:#ffffff;
-  --muted:#9ca3af;
-
   --topbar-h:60px;
   --navbar-h:76px;
 }
 
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-  font-family:Inter;
-  -webkit-tap-highlight-color:transparent;
-}
-
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter}
 html,body{
   width:100%;
   height:100%;
@@ -49,42 +47,24 @@ html,body{
   display:flex;
   align-items:center;
   justify-content:center;
-  overflow:hidden;
 }
-
-#matrix{
-  position:absolute;
-  inset:0;
-}
-
 #logo{
-  position:relative;
   font-size:48px;
   font-weight:900;
   letter-spacing:.16em;
   color:var(--neon);
   text-shadow:0 0 30px rgba(0,229,255,.65);
-  animation:pulse 2.2s infinite;
+  animation:pulse 2s infinite;
 }
-
-@keyframes pulse{
-  0%,100%{opacity:1}
-  50%{opacity:.55}
-}
+@keyframes pulse{50%{opacity:.55}}
 
 /* ================= APP ================= */
-#app{
-  display:none;
-  width:100%;
-  height:100%;
-}
+#app{display:none;width:100%;height:100%}
 
 /* ================= TOPBAR ================= */
 .topbar{
   position:fixed;
-  top:0;
-  left:0;
-  right:0;
+  top:0;left:0;right:0;
   height:var(--topbar-h);
   background:#020409;
   border-bottom:1px solid var(--border);
@@ -102,12 +82,8 @@ html,body{
   position:fixed;
   top:var(--topbar-h);
   bottom:var(--navbar-h);
-  left:0;
-  right:0;
-  background:var(--bg);
-  overflow:hidden;
+  left:0;right:0;
 }
-
 iframe{
   width:100%;
   height:100%;
@@ -118,21 +94,16 @@ iframe{
 /* ================= NAVBAR ================= */
 .navbar{
   position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
+  bottom:0;left:0;right:0;
   height:var(--navbar-h);
   background:#020409;
   border-top:1px solid var(--border);
   display:flex;
   justify-content:space-around;
   align-items:center;
-  z-index:10;
 }
-
 .nav-btn{
-  width:54px;
-  height:54px;
+  width:54px;height:54px;
   border-radius:50%;
   display:flex;
   align-items:center;
@@ -140,34 +111,10 @@ iframe{
   color:var(--neon);
   font-size:22px;
   cursor:pointer;
-  transition:.2s ease;
 }
-
-.nav-btn.active,
-.nav-btn:hover{
+.nav-btn.active{
   background:rgba(0,229,255,.12);
   box-shadow:0 0 22px rgba(0,229,255,.45);
-}
-
-/* ================= OVERLAY ================= */
-#overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.65);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:9999;
-}
-
-#overlay .box{
-  padding:18px 24px;
-  border-radius:999px;
-  background:#020409;
-  border:1px solid var(--neon);
-  color:var(--neon);
-  font-weight:800;
-  box-shadow:0 0 34px rgba(0,229,255,.55);
 }
 </style>
 </head>
@@ -176,106 +123,55 @@ iframe{
 
 <!-- SPLASH -->
 <div id="splash">
-  <canvas id="matrix"></canvas>
   <div id="logo">CLENA</div>
 </div>
 
 <!-- APP -->
 <div id="app">
 
-  <!-- TOPBAR -->
   <div class="topbar">CLENA</div>
 
-  <!-- CONTENT -->
   <div class="content">
     <iframe id="frame" src="home.html"></iframe>
   </div>
 
-  <!-- NAVBAR -->
   <nav class="navbar">
-    <div class="nav-btn active" onclick="go(this,'home.html')">
-      <i class="ri-home-5-line"></i>
-    </div>
-    <div class="nav-btn" onclick="go(this,'financeiro.html')">
-      <i class="ri-wallet-3-line"></i>
-    </div>
-    <div class="nav-btn" onclick="go(this,'faturamento.html')">
-      <i class="ri-line-chart-line"></i>
-    </div>
-    <div class="nav-btn" onclick="go(this,'previsao.html')">
-      <i class="ri-bar-chart-2-line"></i>
-    </div>
-    <div class="nav-btn" onclick="go(this,'lojas.html')">
-      <i class="ri-store-2-line"></i>
-    </div>
-    <div class="nav-btn" onclick="go(this,'auditoria.html')">
-      <i class="ri-shield-check-line"></i>
-    </div>
-    <div class="nav-btn" onclick="go(this,'ajustes.html')">
-      <i class="ri-settings-3-line"></i>
-    </div>
+    <div class="nav-btn active" onclick="go(this,'home.html')"><i class="ri-home-5-line"></i></div>
+    <div class="nav-btn" onclick="go(this,'financeiro.html')"><i class="ri-wallet-3-line"></i></div>
+    <div class="nav-btn" onclick="go(this,'faturamento.html')"><i class="ri-line-chart-line"></i></div>
+    <div class="nav-btn" onclick="go(this,'previsao.html')"><i class="ri-bar-chart-2-line"></i></div>
+    <div class="nav-btn" onclick="go(this,'lojas.html')"><i class="ri-store-2-line"></i></div>
+    <div class="nav-btn" onclick="go(this,'auditoria.html')"><i class="ri-shield-check-line"></i></div>
+    <div class="nav-btn" onclick="go(this,'ajustes.html')"><i class="ri-settings-3-line"></i></div>
   </nav>
 
 </div>
 
-<!-- OVERLAY -->
-<div id="overlay">
-  <div class="box">Atualizando dados…</div>
-</div>
-
 <script>
-/* ================= SPLASH EFFECT ================= */
-const canvas = document.getElementById("matrix");
-const ctx = canvas.getContext("2d");
-canvas.width = innerWidth;
-canvas.height = innerHeight;
-
-const cols = Math.floor(canvas.width / 20);
-const drops = Array(cols).fill(0);
-
-function drawMatrix(){
-  ctx.fillStyle="rgba(0,0,0,.18)";
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-  ctx.fillStyle="#d4af37";
-  ctx.font="18px monospace";
-
-  drops.forEach((y,i)=>{
-    ctx.fillText("$",i*20,y*20);
-    if(y*20>canvas.height && Math.random()>.96) drops[i]=0;
-    drops[i]++;
-  });
-}
-
-const matrixInterval = setInterval(drawMatrix,50);
-
+/* SPLASH */
 setTimeout(()=>{
-  clearInterval(matrixInterval);
-  document.getElementById("splash").style.display="none";
-  document.getElementById("app").style.display="block";
-},2600);
+  splash.style.display="none";
+  app.style.display="block";
+},1800);
 
-/* ================= NAV ================= */
+/* NAV */
 function go(el,page){
   document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
   el.classList.add("active");
-
-  overlay(true);
   frame.src = page;
 }
 
-/* ================= OVERLAY ================= */
-function overlay(show){
-  document.getElementById("overlay").style.display = show ? "flex" : "none";
-}
-
-frame.onload = ()=> overlay(false);
-
-/* ================= AUTO REFRESH ================= */
+/* 🔁 ATUALIZAÇÃO EM SEGUNDO PLANO (SEM PISCAR) */
 setInterval(()=>{
-  overlay(true);
-  const current = frame.src;
-  frame.src = current;
+  if(frame.contentWindow){
+    frame.contentWindow.postMessage({ type:"REFRESH" }, "*");
+  }
 },2000);
+
+/* PWA */
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("/sw.js");
+}
 </script>
 
 </body>
