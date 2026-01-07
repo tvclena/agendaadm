@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Lojas • CLENA</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --bg:#040507;
+  --card:#0b1220;
+  --border:#0f172a;
+  --neon:#00e5ff;
+  --ok:#16a34a;
+  --warn:#facc15;
+  --danger:#ef4444;
+  --text:#ffffff;
+  --muted:#9ca3af;
+}
+
+*{box-sizing:border-box;font-family:Inter}
+html,body{margin:0;background:var(--bg);color:var(--text)}
+
+.container{
+  padding:14px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+
+/* CARD */
+.card{
+  background:linear-gradient(180deg,#0b1220,#060a14);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:12px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  box-shadow:0 0 0 1px rgba(0,229,255,.03);
+}
+
+/* HEADER */
+.header{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+.logo{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  background:#020409;
+  border:1px solid var(--border);
+  background-size:cover;
+  background-position:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:900;
+  color:var(--neon);
+}
+.title{
+  flex:1;
+}
+.title strong{
+  font-size:13px;
+  display:block;
+}
+.title span{
+  font-size:11px;
+  color:var(--muted);
+}
+
+/* INFO */
+.info{
+  font-size:11px;
+  color:var(--muted);
+  line-height:1.4;
+}
+
+/* BADGES */
+.badges{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.badge{
+  font-size:10px;
+  padding:4px 8px;
+  border-radius:999px;
+  font-weight:800;
+}
+.ok{background:rgba(22,163,74,.15);color:#4ade80}
+.warn{background:rgba(250,204,21,.15);color:#fde047}
+.danger{background:rgba(239,68,68,.15);color:#f87171}
+
+/* ACTIONS */
+.actions{
+  display:flex;
+  gap:8px;
+  margin-top:auto;
+}
+.btn{
+  flex:1;
+  border:none;
+  border-radius:999px;
+  padding:8px;
+  font-size:11px;
+  font-weight:800;
+  cursor:pointer;
+}
+.btn-wa{
+  background:#16a34a;
+  color:#fff;
+}
+.btn-view{
+  background:#020409;
+  color:var(--neon);
+  border:1px solid var(--neon);
+}
+
+/* MODAL */
+#modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.75);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+.modal-box{
+  width:94%;
+  height:88%;
+  background:#000;
+  border-radius:18px;
+  overflow:hidden;
+  position:relative;
+}
+.modal-box iframe{
+  width:100%;
+  height:100%;
+  border:none;
+}
+.close{
+  position:absolute;
+  top:8px;
+  right:8px;
+  background:#000;
+  border:1px solid var(--border);
+  color:#fff;
+  border-radius:50%;
+  width:34px;
+  height:34px;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container" id="lista"></div>
+
+<!-- MODAL -->
+<div id="modal">
+  <div class="modal-box">
+    <button class="close" onclick="fechar()">✕</button>
+    <iframe id="preview"></iframe>
+  </div>
+</div>
+
+<script>
+const sb = supabase.createClient(
+  "https://egxjgmzukjyyxmkukwub.supabase.co",
+  "sb_publishable_EWwdrLOUk6KDHZGLuh4uRg_QDRtLeFi"
+);
+
+async function carregar(){
+  const { data } = await sb
+    .from("user_profile")
+    .select("*")
+    .order("created_at",{ ascending:false });
+
+  if(!data) return;
+
+  lista.innerHTML = data.map(l=>{
+    const inicial = l.negocio?.[0]?.toUpperCase() || "?";
+    const wa = l.whatsapp
+      ? `<button class="btn btn-wa" onclick="wa('${l.whatsapp}')">WhatsApp</button>`
+      : "";
+
+    const pagamento = l.pagamento_online_ativo
+      ? `<span class="badge ok">Pagamento Online</span>`
+      : `<span class="badge danger">Sem Pagamento</span>`;
+
+    let status = "";
+    if(l.status === "active") status = `<span class="badge ok">Ativa</span>`;
+    else if(l.status === "trial") status = `<span class="badge warn">Teste</span>`;
+    else status = `<span class="badge danger">Expirada</span>`;
+
+    return `
+      <div class="card">
+        <div class="header">
+          <div class="logo" style="background-image:url('${l.avatar_url||""}')">
+            ${l.avatar_url?"":inicial}
+          </div>
+          <div class="title">
+            <strong>${l.negocio||"Sem nome"}</strong>
+            <span>${l.tipo||""}</span>
+          </div>
+        </div>
+
+        <div class="info">
+          ${l.cidade||""} / ${l.uf||""}<br>
+          Resp: ${l.responsavel||"-"}
+        </div>
+
+        <div class="badges">
+          ${pagamento}
+          ${status}
+        </div>
+
+        <div class="actions">
+          ${wa}
+          <button class="btn btn-view" onclick="ver('${l.slug}')">
+            Visualizar
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function wa(num){
+  const n = num.replace(/\D/g,"");
+  window.open(`https://wa.me/55${n}`,"_blank");
+}
+
+function ver(slug){
+  if(!slug) return alert("Loja sem slug");
+  preview.src = `https://www.clena.com.br/loja.html?${slug}`;
+  modal.style.display="flex";
+}
+function fechar(){
+  modal.style.display="none";
+  preview.src="";
+}
+
+/* REFRESH SILENCIOSO */
+window.addEventListener("message",e=>{
+  if(e.data?.type==="REFRESH") carregar();
+});
+
+carregar();
+</script>
+
+</body>
+</html>
