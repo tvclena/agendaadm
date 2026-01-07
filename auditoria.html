@@ -27,9 +27,20 @@
   --text:#fff;
   --muted:#9ca3af;
 }
-*{box-sizing:border-box;font-family:Inter}
-html,body{margin:0;background:var(--bg);color:var(--text)}
 
+*{
+  box-sizing:border-box;
+  font-family:Inter;
+  touch-action:manipulation;
+}
+
+html,body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+}
+
+/* LAYOUT */
 .container{
   padding:12px;
   display:flex;
@@ -37,11 +48,39 @@ html,body{margin:0;background:var(--bg);color:var(--text)}
   gap:12px;
 }
 
+/* CARD */
 .card{
   background:linear-gradient(180deg,#0b1220,#060a14);
   border:1px solid var(--border);
   border-radius:18px;
   padding:12px;
+  display:flex;
+  gap:12px;
+}
+
+/* IMAGEM */
+.thumb{
+  width:72px;
+  height:72px;
+  border-radius:14px;
+  background:#020409;
+  border:1px solid var(--border);
+  background-size:cover;
+  background-position:center;
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--muted);
+  font-size:10px;
+}
+
+/* CONTEÚDO */
+.content{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
 }
 
 .header{
@@ -51,6 +90,11 @@ html,body{margin:0;background:var(--bg);color:var(--text)}
   gap:10px;
 }
 
+.header strong{
+  font-size:13px;
+}
+
+/* BADGES */
 .badge{
   font-size:10px;
   padding:4px 8px;
@@ -61,10 +105,18 @@ html,body{margin:0;background:var(--bg);color:var(--text)}
 .warn{background:rgba(250,204,21,.15);color:#fde047}
 .danger{background:rgba(239,68,68,.15);color:#f87171}
 
+/* INFO */
+.info{
+  font-size:11px;
+  color:var(--muted);
+  line-height:1.45;
+}
+
+/* ACTIONS */
 .actions{
   display:flex;
   gap:8px;
-  margin-top:8px;
+  margin-top:6px;
 }
 .btn{
   flex:1;
@@ -109,27 +161,38 @@ async function carregar(){
       ? `<button class="btn btn-wa" onclick="wa('${loja.whatsapp}')">WhatsApp</button>`
       : "";
 
+    const img = p.imagem_url
+      ? `<div class="thumb" style="background-image:url('${p.imagem_url}')"></div>`
+      : `<div class="thumb">SEM FOTO</div>`;
+
     return `
       <div class="card">
-        <div class="header">
-          <strong>${p.nome}</strong>
-          <span class="badge ${p.ativo?"ok":"danger"}">
-            ${p.ativo?"Ativo":"Inativo"}
-          </span>
-        </div>
 
-        <div style="font-size:11px;color:var(--muted)">
-          ${p.tipo} • R$ ${Number(p.preco).toFixed(2)}<br>
-          Loja: ${loja.negocio||"-"}<br>
-          ${loja.cidade||""} ${loja.uf||""}<br>
-          Resp: ${loja.responsavel||"-"}
-        </div>
+        ${img}
 
-        <div class="actions">
-          ${wa}
-          <button class="btn btn-del" onclick="excluir('${p.id}')">
-            Excluir
-          </button>
+        <div class="content">
+
+          <div class="header">
+            <strong>${p.nome}</strong>
+            <span class="badge ${p.ativo?"ok":"danger"}">
+              ${p.ativo?"Ativo":"Inativo"}
+            </span>
+          </div>
+
+          <div class="info">
+            ${p.tipo} • R$ ${Number(p.preco).toFixed(2)}<br>
+            Loja: ${loja.negocio||"-"}<br>
+            ${loja.cidade||""} ${loja.uf||""}<br>
+            Resp: ${loja.responsavel||"-"}
+          </div>
+
+          <div class="actions">
+            ${wa}
+            <button class="btn btn-del" onclick="excluir('${p.id}')">
+              Excluir
+            </button>
+          </div>
+
         </div>
       </div>
     `;
