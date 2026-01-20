@@ -1,143 +1,179 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Administrativo</title>
-    <!-- AdminLTE and Chart.js -->
-    <link href="https://cdn.jsdelivr.net/npm/admin-lte@3.0.5/dist/css/adminlte.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/chart.js" rel="stylesheet">
+    <title>Dashboard V3</title>
+    <!-- AdminLTE CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.1.0/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
-        /* Custom Styles */
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f4f6fb;
+            background-color: #f4f6f9;
         }
-        .content-wrapper {
-            margin-left: 250px;
+
+        .chart-container {
+            margin-bottom: 20px;
         }
-        .sidebar {
-            background-color: #3c8dbc;
-            color: white;
-            height: 100vh;
-            width: 250px;
-            position: fixed;
+
+        .card-body {
+            padding: 15px;
         }
-        .sidebar a {
-            color: white;
-            padding: 10px;
-            text-decoration: none;
-            display: block;
-            transition: background 0.3s;
-        }
-        .sidebar a:hover {
-            background-color: #007bff;
-        }
-        .main-header {
-            background-color: #343a40;
-            color: white;
-            padding: 20px;
-            font-size: 24px;
-        }
-        .sidebar .user-panel img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-        }
-        .card {
-            background-color: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
+
         .card-header {
-            font-size: 18px;
+            background-color: #f4f6f9;
+            border-bottom: 1px solid #d2d6de;
+        }
+
+        .navbar-nav .nav-item .nav-link.active {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .sidebar-dark-primary {
+            background-color: #343a40;
+        }
+
+        .brand-link {
+            font-size: 24px;
             font-weight: bold;
         }
-        .chart-container {
-            width: 100%;
-            height: 350px;
+
+        .card-header .card-tools button {
+            background-color: transparent;
+            border: none;
         }
-        .stats {
-            display: flex;
-            justify-content: space-between;
-        }
-        .stat {
-            background-color: #ff6a00;
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            flex: 1;
-            margin-right: 20px;
-            text-align: center;
-        }
-        .stat:last-child {
-            margin-right: 0;
-        }
-        .navbar-dark .navbar-nav .nav-link {
-            color: white;
+
+        .card-tools button i {
+            font-size: 20px;
         }
     </style>
 </head>
-<body class="hold-transition sidebar-mini">
+<body class="hold-transition sidebar-mini layout-fixed">
     <div class="wrapper">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-                <div class="image">
-                    <img src="path_to_profile_picture.png" class="img-circle elevation-2" alt="User Image">
-                </div>
-                <div class="info">
-                    <p>Admin</p>
-                </div>
+        <!-- Main Sidebar Container -->
+        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+            <a href="#" class="brand-link">
+                <span class="brand-text font-weight-light">AdminLTE 3</span>
+            </a>
+            <div class="sidebar">
+                <nav class="mt-2">
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link active">
+                                <i class="nav-icon fas fa-tachometer-alt"></i>
+                                <p>Dashboard</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-chart-bar"></i>
+                                <p>Charts</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-cogs"></i>
+                                <p>Settings</p>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
             </div>
-            <nav>
-                <a href="home.html">Dashboard</a>
-                <a href="#">Sales</a>
-                <a href="#">Settings</a>
-            </nav>
-        </div>
+        </aside>
 
         <!-- Content Wrapper -->
         <div class="content-wrapper">
-            <!-- Main Header -->
-            <header class="main-header">
-                <h1>Dashboard Administrativo</h1>
-            </header>
-
-            <!-- Stats Section -->
-            <section class="content">
+            <div class="content-header">
                 <div class="container-fluid">
-                    <div class="stats">
-                        <div class="stat">
-                            <h4>Total de Lojas</h4>
-                            <p id="total-lojas">0</p>
-                        </div>
-                        <div class="stat">
-                            <h4>Assinantes</h4>
-                            <p id="assinantes">0</p>
-                        </div>
-                        <div class="stat">
-                            <h4>Vendas Totais</h4>
-                            <p id="vendas">R$ 0</p>
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <h1 class="m-0">Dashboard V3</h1>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <!-- Gráficos -->
+            <!-- Main content -->
+            <section class="content">
+                <div class="container-fluid">
                     <div class="row">
-                        <div class="col-md-6">
+                        <!-- Visitors Stats -->
+                        <div class="col-lg-6 col-12">
                             <div class="card">
-                                <div class="card-header">Crescimento de Assinantes</div>
-                                <div class="chart-container">
-                                    <canvas id="assinantesChart"></canvas>
+                                <div class="card-header">
+                                    <h3 class="card-title">Online Store Visitors</h3>
+                                    <div class="card-tools">
+                                        <button type="button" class="btn btn-tool">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <!-- You can embed a chart here (e.g., using Chart.js) -->
+                                        <canvas id="visitorChart"></canvas>
+                                    </div>
+                                    <p>820 Visitors</p>
+                                    <p><strong>+12.5% since last week</strong></p>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
+
+                        <!-- Sales Stats -->
+                        <div class="col-lg-6 col-12">
                             <div class="card">
-                                <div class="card-header">Vendas Totais</div>
-                                <div class="chart-container">
-                                    <canvas id="vendasChart"></canvas>
+                                <div class="card-header">
+                                    <h3 class="card-title">Sales</h3>
+                                    <div class="card-tools">
+                                        <button type="button" class="btn btn-tool">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="salesChart"></canvas>
+                                    </div>
+                                    <p><strong>$18,230.00</strong></p>
+                                    <p><strong>+33.1% since last month</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Products Overview -->
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">Products</h3>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Product</th>
+                                                <th>Price</th>
+                                                <th>Sales</th>
+                                                <th>More</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Some Product</td>
+                                                <td>$13 USD</td>
+                                                <td>12,000 Sold</td>
+                                                <td><a href="#">Details</a></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Another Product</td>
+                                                <td>$29 USD</td>
+                                                <td>123,234 Sold</td>
+                                                <td><a href="#">Details</a></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -147,57 +183,49 @@
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- AdminLTE JS -->
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.1.0/dist/js/adminlte.min.js"></script>
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script>
-        // Initialize Supabase client
-        const supabase = supabase.createClient('https://your-project.supabase.co', 'your-public-anon-key');
-
-        async function fetchData() {
-            const { data, error } = await supabase
-                .from('lojas')
-                .select('*');
-
-            if (error) {
-                console.error(error);
-                return;
+        // Chart.js Setup for Visitors
+        var ctx1 = document.getElementById('visitorChart').getContext('2d');
+        var visitorChart = new Chart(ctx1, {
+            type: 'line',
+            data: {
+                labels: ['18th', '20th', '22nd', '24th', '26th', '28th', '30th'],
+                datasets: [{
+                    label: 'This Week',
+                    data: [120, 150, 170, 180, 190, 210, 220],
+                    borderColor: 'rgba(0,123,255,0.6)',
+                    fill: false,
+                }, {
+                    label: 'Last Week',
+                    data: [100, 120, 140, 160, 170, 180, 190],
+                    borderColor: 'rgba(108,117,125,0.6)',
+                    fill: false,
+                }]
             }
+        });
 
-            // Populate metrics
-            document.getElementById('total-lojas').innerText = data.length;
-            document.getElementById('assinantes').innerText = '500'; // Placeholder
-            document.getElementById('vendas').innerText = '10000'; // Placeholder
-
-            // Example of Graph Data (Replace with real dynamic data)
-            const assinantesChart = new Chart(document.getElementById('assinantesChart'), {
-                type: 'line',
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                    datasets: [{
-                        label: 'Assinantes',
-                        data: [100, 150, 200, 250, 300, 350],
-                        borderColor: '#ff6a00',
-                        fill: false,
-                        tension: 0.1
-                    }]
-                }
-            });
-
-            const vendasChart = new Chart(document.getElementById('vendasChart'), {
-                type: 'bar',
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                    datasets: [{
-                        label: 'Vendas',
-                        data: [5000, 7000, 8000, 10000, 12000, 15000],
-                        backgroundColor: '#ff6a00',
-                    }]
-                }
-            });
-        }
-
-        // Call the function to fetch data when page loads
-        window.onload = fetchData;
+        // Chart.js Setup for Sales
+        var ctx2 = document.getElementById('salesChart').getContext('2d');
+        var salesChart = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: ['JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'],
+                datasets: [{
+                    label: 'This Year',
+                    data: [1200, 1500, 1700, 1800, 2000, 2200, 2300],
+                    backgroundColor: 'rgba(0,123,255,0.6)',
+                }, {
+                    label: 'Last Year',
+                    data: [1000, 1300, 1400, 1600, 1800, 1900, 2100],
+                    backgroundColor: 'rgba(108,117,125,0.6)',
+                }]
+            }
+        });
     </script>
 </body>
 </html>
