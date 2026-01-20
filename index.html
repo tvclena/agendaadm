@@ -1,178 +1,203 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>CLENA • Control Panel</title>
-
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-
-<!-- PWA -->
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#000000">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="CLENA">
-<link rel="apple-touch-icon" href="/logo.png">
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
-
-<style>
-:root{
-  --bg:#040507;
-  --panel:#080b12;
-  --border:#0f172a;
-  --neon:#00e5ff;
-  --text:#ffffff;
-  --topbar-h:60px;
-  --navbar-h:76px;
-}
-
-*{margin:0;padding:0;box-sizing:border-box;font-family:Inter}
-html,body{
-  width:100%;
-  height:100%;
-  background:var(--bg);
-  color:var(--text);
-  overflow:hidden;
-}
-
-/* ================= SPLASH ================= */
-#splash{
-  position:fixed;
-  inset:0;
-  z-index:99999;
-  background:radial-gradient(circle at top,#0b1220,#020205);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-#logo{
-  font-size:48px;
-  font-weight:900;
-  letter-spacing:.16em;
-  color:var(--neon);
-  text-shadow:0 0 30px rgba(0,229,255,.65);
-  animation:pulse 2s infinite;
-}
-@keyframes pulse{50%{opacity:.55}}
-
-/* ================= APP ================= */
-#app{display:none;width:100%;height:100%}
-
-/* ================= TOPBAR ================= */
-.topbar{
-  position:fixed;
-  top:0;left:0;right:0;
-  height:var(--topbar-h);
-  background:#020409;
-  border-bottom:1px solid var(--border);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:var(--neon);
-  font-weight:900;
-  letter-spacing:.14em;
-  z-index:10;
-}
-
-/* ================= CONTENT ================= */
-.content{
-  position:fixed;
-  top:var(--topbar-h);
-  bottom:var(--navbar-h);
-  left:0;right:0;
-}
-iframe{
-  width:100%;
-  height:100%;
-  border:none;
-  background:var(--bg);
-}
-
-/* ================= NAVBAR ================= */
-.navbar{
-  position:fixed;
-  bottom:0;left:0;right:0;
-  height:var(--navbar-h);
-  background:#020409;
-  border-top:1px solid var(--border);
-  display:flex;
-  justify-content:space-around;
-  align-items:center;
-}
-.nav-btn{
-  width:54px;height:54px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:var(--neon);
-  font-size:22px;
-  cursor:pointer;
-}
-.nav-btn.active{
-  background:rgba(0,229,255,.12);
-  box-shadow:0 0 22px rgba(0,229,255,.45);
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Administrativo</title>
+    <!-- AdminLTE and Chart.js -->
+    <link href="https://cdn.jsdelivr.net/npm/admin-lte@3.0.5/dist/css/adminlte.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/chart.js" rel="stylesheet">
+    <style>
+        /* Custom Styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f6fb;
+        }
+        .content-wrapper {
+            margin-left: 250px;
+        }
+        .sidebar {
+            background-color: #3c8dbc;
+            color: white;
+            height: 100vh;
+            width: 250px;
+            position: fixed;
+        }
+        .sidebar a {
+            color: white;
+            padding: 10px;
+            text-decoration: none;
+            display: block;
+            transition: background 0.3s;
+        }
+        .sidebar a:hover {
+            background-color: #007bff;
+        }
+        .main-header {
+            background-color: #343a40;
+            color: white;
+            padding: 20px;
+            font-size: 24px;
+        }
+        .sidebar .user-panel img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .chart-container {
+            width: 100%;
+            height: 350px;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+        }
+        .stat {
+            background-color: #ff6a00;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            flex: 1;
+            margin-right: 20px;
+            text-align: center;
+        }
+        .stat:last-child {
+            margin-right: 0;
+        }
+        .navbar-dark .navbar-nav .nav-link {
+            color: white;
+        }
+    </style>
 </head>
+<body class="hold-transition sidebar-mini">
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+                <div class="image">
+                    <img src="path_to_profile_picture.png" class="img-circle elevation-2" alt="User Image">
+                </div>
+                <div class="info">
+                    <p>Admin</p>
+                </div>
+            </div>
+            <nav>
+                <a href="home.html">Dashboard</a>
+                <a href="#">Sales</a>
+                <a href="#">Settings</a>
+            </nav>
+        </div>
 
-<body>
+        <!-- Content Wrapper -->
+        <div class="content-wrapper">
+            <!-- Main Header -->
+            <header class="main-header">
+                <h1>Dashboard Administrativo</h1>
+            </header>
 
-<!-- SPLASH -->
-<div id="splash">
-  <div id="logo">CLENA</div>
-</div>
+            <!-- Stats Section -->
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="stats">
+                        <div class="stat">
+                            <h4>Total de Lojas</h4>
+                            <p id="total-lojas">0</p>
+                        </div>
+                        <div class="stat">
+                            <h4>Assinantes</h4>
+                            <p id="assinantes">0</p>
+                        </div>
+                        <div class="stat">
+                            <h4>Vendas Totais</h4>
+                            <p id="vendas">R$ 0</p>
+                        </div>
+                    </div>
 
-<!-- APP -->
-<div id="app">
+                    <!-- Gráficos -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">Crescimento de Assinantes</div>
+                                <div class="chart-container">
+                                    <canvas id="assinantesChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">Vendas Totais</div>
+                                <div class="chart-container">
+                                    <canvas id="vendasChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
 
-  <div class="topbar">CLENA</div>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Initialize Supabase client
+        const supabase = supabase.createClient('https://your-project.supabase.co', 'your-public-anon-key');
 
-  <div class="content">
-    <iframe id="frame" src="home.html"></iframe>
-  </div>
+        async function fetchData() {
+            const { data, error } = await supabase
+                .from('lojas')
+                .select('*');
 
-  <nav class="navbar">
-    <div class="nav-btn active" onclick="go(this,'home.html')"><i class="ri-home-5-line"></i></div>
-    <div class="nav-btn" onclick="go(this,'financeiro.html')"><i class="ri-wallet-3-line"></i></div>
-    <div class="nav-btn" onclick="go(this,'faturamento.html')"><i class="ri-line-chart-line"></i></div>
-    <div class="nav-btn" onclick="go(this,'previsao.html')"><i class="ri-bar-chart-2-line"></i></div>
-    <div class="nav-btn" onclick="go(this,'lojas.html')"><i class="ri-store-2-line"></i></div>
-    <div class="nav-btn" onclick="go(this,'auditoria.html')"><i class="ri-shield-check-line"></i></div>
-    <div class="nav-btn" onclick="go(this,'ajustes.html')"><i class="ri-settings-3-line"></i></div>
-  </nav>
+            if (error) {
+                console.error(error);
+                return;
+            }
 
-</div>
+            // Populate metrics
+            document.getElementById('total-lojas').innerText = data.length;
+            document.getElementById('assinantes').innerText = '500'; // Placeholder
+            document.getElementById('vendas').innerText = '10000'; // Placeholder
 
-<script>
-/* SPLASH */
-setTimeout(()=>{
-  splash.style.display="none";
-  app.style.display="block";
-},1800);
+            // Example of Graph Data (Replace with real dynamic data)
+            const assinantesChart = new Chart(document.getElementById('assinantesChart'), {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Assinantes',
+                        data: [100, 150, 200, 250, 300, 350],
+                        borderColor: '#ff6a00',
+                        fill: false,
+                        tension: 0.1
+                    }]
+                }
+            });
 
-/* NAV */
-function go(el,page){
-  document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
-  el.classList.add("active");
-  frame.src = page;
-}
+            const vendasChart = new Chart(document.getElementById('vendasChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Vendas',
+                        data: [5000, 7000, 8000, 10000, 12000, 15000],
+                        backgroundColor: '#ff6a00',
+                    }]
+                }
+            });
+        }
 
-/* 🔁 ATUALIZAÇÃO EM SEGUNDO PLANO (SEM PISCAR) */
-setInterval(()=>{
-  if(frame.contentWindow){
-    frame.contentWindow.postMessage({ type:"REFRESH" }, "*");
-  }
-},2000);
-
-/* PWA */
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("/sw.js");
-}
-</script>
-
+        // Call the function to fetch data when page loads
+        window.onload = fetchData;
+    </script>
 </body>
 </html>
